@@ -35,6 +35,7 @@
 #include <opm/core/utility/miscUtilities.hpp>
 #include <opm/core/utility/parameters/ParameterGroup.hpp>
 
+#include <opm/autodiff/BlackoilEclipseOutputWriter.hpp>
 #include <opm/core/props/BlackoilPropertiesBasic.hpp>
 #include <opm/core/props/BlackoilPropertiesFromDeck.hpp>
 #include <opm/core/props/rock/RockCompressibility.hpp>
@@ -49,6 +50,7 @@
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include <algorithm>
 #include <iostream>
@@ -100,6 +102,20 @@ try
     deck.reset(new EclipseGridParser(deck_filename));
     // Grid init
     grid.reset(new GridManager(*deck));
+    const auto &outputDir = param.getDefault("output_dir", std::string("output"));
+
+    // use the capitalized part of the deck's filename between the
+    // last '/' and the last '.' character as base name.
+    std::string baseName = deck_filename;
+    auto charPos = baseName.rfind('/');
+    if (charPos != std::string::npos)
+        baseName = baseName.substr(charPos + 1);
+    charPos = baseName.rfind('.');
+    if (charPos != std::string::npos)
+        baseName = baseName.substr(0, charPos);
+    baseName = boost::to_upper_copy(baseName);
+
+    Opm::BlackoilEclipseOutputWriter outputWriter(*deck, *grid->c_grid(), outputDir, baseName);
     // Rock and fluid init
     props.reset(new BlackoilPropertiesFromDeck(*deck, *grid->c_grid(), param));
     new_props.reset(new BlackoilPropsAdFromDeck(*deck, *grid->c_grid()));
@@ -207,7 +223,8 @@ try
                                                  rock_comp->isActive() ? rock_comp.get() : 0,
                                                  wells,
                                                  linsolver,
-                                                 grav);
+                                                 grav,
+                                                 outputWriter);
         if (epoch == 0) {
             warnIfUnusedParams(param);
         }

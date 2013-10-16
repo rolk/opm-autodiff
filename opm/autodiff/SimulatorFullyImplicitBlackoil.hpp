@@ -20,6 +20,8 @@
 #ifndef OPM_SIMULATORFULLYIMPLICITBLACKOIL_HEADER_INCLUDED
 #define OPM_SIMULATORFULLYIMPLICITBLACKOIL_HEADER_INCLUDED
 
+#include <opm/autodiff/BlackoilEclipseOutputWriter.hpp>
+
 #include <boost/shared_ptr.hpp>
 #include <vector>
 
@@ -71,7 +73,8 @@ namespace Opm
                                        const RockCompressibility* rock_comp_props,
                                        WellsManager& wells_manager,
                                        LinearSolverInterface& linsolver,
-                                       const double* gravity);
+                                       const double* gravity,
+                                       BlackoilEclipseOutputWriter &writer);
 
         /// Run the simulation.
         /// This will run succesive timesteps until timer.done() is true. It will
