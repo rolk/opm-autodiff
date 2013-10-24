@@ -478,7 +478,7 @@ namespace Opm
 
                 // write an output file for later inspection
                 eclipseWriter_.writeReservoirState(state, timer);
-                eclipseWriter_.writeWellState(well_state);
+                eclipseWriter_.writeWellState(well_state, timer);
 
                 if (output_vtk_) {
                     outputStateVtk(grid_, state, timer.currentStepNum(), output_dir_);
