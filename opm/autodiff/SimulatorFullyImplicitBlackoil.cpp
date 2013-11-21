@@ -37,6 +37,7 @@
 #include <opm/core/simulator/SimulatorReport.hpp>
 #include <opm/core/simulator/SimulatorTimer.hpp>
 #include <opm/core/utility/StopWatch.hpp>
+#include <opm/core/io/eclipse/EclipseWriter.hpp>
 #include <opm/core/io/vtk/writeVtkData.hpp>
 #include <opm/core/utility/miscUtilities.hpp>
 #include <opm/core/utility/miscUtilitiesBlackoil.hpp>
@@ -72,7 +73,7 @@ namespace Opm
              WellsManager& wells_manager,
              LinearSolverInterface& linsolver,
              const double* gravity,
-             BlackoilEclipseOutputWriter &writer);
+             EclipseWriter &writer);
 
         SimulatorReport run(SimulatorTimer& timer,
                             BlackoilState& state,
@@ -101,7 +102,7 @@ namespace Opm
         FullyImplicitBlackoilSolver solver_;
         // Misc. data
         std::vector<int> allcells_;
-        BlackoilEclipseOutputWriter &eclipseWriter_;
+        EclipseWriter &eclipseWriter_;
     };
 
 
@@ -114,7 +115,7 @@ namespace Opm
                                                                    WellsManager& wells_manager,
                                                                    LinearSolverInterface& linsolver,
                                                                    const double* gravity,
-                                                                   BlackoilEclipseOutputWriter &eclipseWriter)
+                                                                   EclipseWriter &eclipseWriter)
 
     {
 	    pimpl_.reset(new Impl(param, grid, props, rock_comp_props, wells_manager, linsolver, gravity, eclipseWriter));
@@ -262,7 +263,7 @@ namespace Opm
                                                WellsManager& wells_manager,
                                                LinearSolverInterface& linsolver,
                                                const double* gravity,
-                                               BlackoilEclipseOutputWriter &eclipseWriter)
+                                               EclipseWriter &eclipseWriter)
         : grid_(grid),
           props_(props),
           rock_comp_props_(rock_comp_props),
@@ -313,7 +314,7 @@ namespace Opm
                                                               BlackoilState& state,
                                                               WellState& well_state)
     {
-        eclipseWriter_.writeInitFile(timer);
+        eclipseWriter_.writeInit(timer, state, well_state);
 
         // Initialisation.
         std::vector<double> porevol;
@@ -357,7 +358,7 @@ namespace Opm
             std::string filename = output_dir_ + "/step_timing.param";
             tstep_os.open(filename.c_str(), std::fstream::out | std::fstream::app);
         }
-        for (; !timer.done(); ++timer) {
+        while (!timer.done()) {
             // Report timestep and (optionally) write state to disk.
             step_timer.start();
             timer.report(std::cout);
@@ -476,10 +477,6 @@ namespace Opm
             if (output_) {
                 sreport.reportParam(tstep_os);
 
-                // write an output file for later inspection
-                eclipseWriter_.writeReservoirState(state, timer);
-                eclipseWriter_.writeWellState(well_state, timer);
-
                 if (output_vtk_) {
                     outputStateVtk(grid_, state, timer.currentStepNum(), output_dir_);
                 }
@@ -492,6 +489,14 @@ namespace Opm
                 }
 #endif
                 tstep_os.close();
+            }
+
+            // advance to next timestep before reporting at this location
+            ++timer;
+
+            // write an output file for later inspection
+            if (output_) {
+                eclipseWriter_.writeTimeStep(timer, state, well_state);
             }
         }
 

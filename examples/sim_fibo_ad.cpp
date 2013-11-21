@@ -35,7 +35,7 @@
 #include <opm/core/utility/miscUtilities.hpp>
 #include <opm/core/utility/parameters/ParameterGroup.hpp>
 
-#include <opm/autodiff/BlackoilEclipseOutputWriter.hpp>
+#include <opm/core/io/eclipse/EclipseWriter.hpp>
 #include <opm/core/props/BlackoilPropertiesBasic.hpp>
 #include <opm/core/props/BlackoilPropertiesFromDeck.hpp>
 #include <opm/core/props/rock/RockCompressibility.hpp>
@@ -47,6 +47,7 @@
 
 #include <opm/autodiff/SimulatorFullyImplicitBlackoil.hpp>
 #include <opm/autodiff/BlackoilPropsAdFromDeck.hpp>
+#include <opm/core/utility/share_obj.hpp>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/filesystem.hpp>
@@ -115,7 +116,7 @@ try
         baseName = baseName.substr(0, charPos);
     baseName = boost::to_upper_copy(baseName);
 
-    Opm::BlackoilEclipseOutputWriter outputWriter(*deck, *grid->c_grid(), outputDir, baseName);
+    Opm::EclipseWriter outputWriter(param, share_obj(*deck), share_obj(*grid->c_grid()));
     // Rock and fluid init
     props.reset(new BlackoilPropertiesFromDeck(*deck, *grid->c_grid(), param));
     new_props.reset(new BlackoilPropsAdFromDeck(*deck, *grid->c_grid()));
