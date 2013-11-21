@@ -26,7 +26,6 @@
 # originally generated with the command:
 # find opm -name '*.c*' -printf '\t%p\n' | sort
 list (APPEND MAIN_SOURCE_FILES
-	opm/autodiff/BlackoilEclipseOutputWriter.cpp
 	opm/autodiff/BlackoilPropsAd.cpp
 	opm/autodiff/BlackoilPropsAdInterface.cpp
 	opm/autodiff/FullyImplicitBlackoilSolver.cpp
@@ -77,7 +76,6 @@ list (APPEND PUBLIC_HEADER_FILES
 	opm/autodiff/AutoDiffBlock.hpp
 	opm/autodiff/AutoDiffHelpers.hpp
 	opm/autodiff/AutoDiff.hpp
-	opm/autodiff/BlackoilEclipseOutputWriter.hpp
 	opm/autodiff/BlackoilPropsAd.hpp
 	opm/autodiff/BlackoilPropsAdFromDeck.hpp
 	opm/autodiff/BlackoilPropsAdInterface.hpp
