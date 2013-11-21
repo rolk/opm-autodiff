@@ -103,7 +103,6 @@ try
     deck.reset(new EclipseGridParser(deck_filename));
     // Grid init
     grid.reset(new GridManager(*deck));
-    const auto &outputDir = param.getDefault("output_dir", std::string("output"));
 
     // use the capitalized part of the deck's filename between the
     // last '/' and the last '.' character as base name.
